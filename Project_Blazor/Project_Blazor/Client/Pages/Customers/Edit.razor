@@ -1,0 +1,68 @@
+﻿@page "/Customers/Edit/{id:int}"
+@inject HttpClient http
+@inject IToastService toastService
+<div class="row">
+    <div class="col-12">
+       @if(customer is null)
+        {
+            <div>Loading...</div>
+        }
+        else
+        {
+            <EditForm Model="@customer" OnValidSubmit="SaveCustomer">
+                <h3>Create Customer</h3>
+                <DataAnnotationsValidator />
+                <div class="form-group row mb-1">
+                    <label class="col-form-label col-2 text-end" for="@customer.CustomerName">Customer name</label>
+                    <div class="col-4">
+                        <InputText @bind-Value="customer.CustomerName" class="form-control" />
+                        <ValidationMessage For="@(()=>customer.CustomerName)" class="text-danger" />
+                    </div>
+                </div>
+                <div class="form-group row mb-1">
+                    <label class="col-form-label col-2 text-end" for="@customer.Address">Address</label>
+                    <div class="col-4">
+                        <InputTextArea @bind-Value="customer.Address" class="form-control" />
+                        <ValidationMessage For="@(()=>customer.Address)" class="text-danger" />
+                    </div>
+                </div>
+                <div class="form-group row mb-1">
+                    <label class="col-form-label col-2 text-end" for="@customer.Email">Email</label>
+                    <div class="col-4">
+                        <InputText @bind-Value="customer.Email" class="form-control" />
+                        <ValidationMessage For="@(()=>customer.Email)" class="text-danger" />
+                    </div>
+                </div>
+                <div class="form-group row mb-1">
+
+                    <div class="col-4 offset-2">
+                        <button type="submit" class="btn btn-primary">Save</button>
+
+                    </div>
+                </div>
+            </EditForm>
+        }
+    </div>
+    <div class="col-12">
+        <a href="/Customers/List" class="btn btn-link">Back to list</a>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+    private Customer? customer = default!;
+    protected override async Task OnInitializedAsync()
+    {
+        customer = await http.GetFromJsonAsync<Customer>($"api/Customers/{id}");
+    }
+    private async Task SaveCustomer()
+    {
+        var respose = await http.PutAsJsonAsync($"api/Customers/{id}", customer);
+        if (respose.IsSuccessStatusCode)
+        {
+            toastService.ShowSuccess("Data updated successsfully", "Success");
+           
+        }
+    }
+}
